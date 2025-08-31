@@ -1,5 +1,5 @@
 # Analisis-ventas-AdventureWorks
-<img src="https://github.com/user-attachments/assets/2ab2a801-f9dc-48bd-8653-61361b0f8576" 
+<img src="https://github.com/user-attachments/assets/35061616-8377-47e8-baa1-6135da8123c3" 
      alt="Dashboard AdventureWorks" 
      style="max-width:100%; height:auto; display:block; margin:auto;" />
 
