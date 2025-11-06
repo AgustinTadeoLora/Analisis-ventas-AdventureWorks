@@ -1,4 +1,4 @@
-﻿--Creamos la base de datos.
+--Creamos la base de datos.
 CREATE DATABASE AdventureWorks_Limpieza;
 
 /* Se puede hacer de dos formas, solo escribimos las consultas para ver si funcionan
@@ -73,11 +73,15 @@ FROM Production.Product;
 
 --DUPLICADOS
 
+WITH duplicates AS (
+    SELECT ProductNumber
+    FROM Production.Product
+    GROUP BY ProductNumber
+    HAVING COUNT(*) > 1
+)
 SELECT *
 FROM Production.Product
-EXCEPT
-SELECT DISTINCT *
-FROM Production.Product;
+WHERE ProductNumber IN (SELECT ProductNumber FROM duplicates);
 
 ALTER TABLE production.product
 DROP COLUMN rowguid;
@@ -276,11 +280,15 @@ FROM Production.ProductCategory;
 
 --DUPLICADOS
 
+WITH duplicates AS (
+    SELECT Name
+    FROM Production.ProductCategory
+    GROUP BY Name
+    HAVING COUNT(*) > 1
+)
 SELECT *
 FROM Production.ProductCategory
-EXCEPT
-SELECT DISTINCT *
-FROM Production.ProductCategory;
+WHERE Name IN (SELECT Name FROM duplicates);
 
 ALTER TABLE production.productCategory
 DROP COLUMN rowguid;
@@ -309,11 +317,17 @@ SELECT
 FROM Production.ProductSubcategory;
 
 --DUPLICADOS
+WITH cte AS (
+    SELECT *,
+           ROW_NUMBER() OVER(
+               PARTITION BY ProductCategoryID, Name, ModifiedDate
+               ORDER BY ModifiedDate DESC
+           ) AS rn
+    FROM Production.ProductCategory
+)
 SELECT *
-FROM Production.ProductCategory
-EXCEPT
-SELECT DISTINCT *
-FROM Production.ProductCategory;
+FROM cte
+WHERE rn > 1;
 
 ALTER TABLE production.productSubCategory
 DROP COLUMN rowguid;
@@ -351,11 +365,17 @@ SELECT
 FROM sales.SalesOrderDetail;
 
 --DUPLICADOS
+WITH cte AS (
+    SELECT *,
+           ROW_NUMBER() OVER(
+               PARTITION BY SalesOrderID, SalesOrderDetailID, OrderQty, ProductID, UnitPrice, UnitPriceDiscount, LineTotal, ModifiedDate
+               ORDER BY ModifiedDate DESC
+           ) AS rn
+    FROM Sales.SalesOrderDetail
+)
 SELECT *
-FROM sales.salesOrderDetail
-EXCEPT
-SELECT DISTINCT *
-FROM sales.salesOrderDetail;
+FROM cte
+WHERE rn > 1;
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -392,11 +412,21 @@ SELECT
 FROM Sales.SalesOrderHeader;
 
 --DUPLICADOS
+WITH cte AS (
+    SELECT *,
+           ROW_NUMBER() OVER(
+               PARTITION BY SalesOrderID, RevisionNumber, OrderDate, DueDate, ShipDate, Status, OnlineOrderFlag,
+                            SalesOrderNumber, PurchaseOrderNumber, AccountNumber, CustomerID, SalesPersonID,
+                            TerritoryID, BillToAddressID, ShipToAddressID, ShipMethodID, CreditCardID,
+                            CreditCardApprovalCode, CurrencyRateID, SubTotal, TaxAmt, Freight, TotalDue,
+                            ModifiedDate
+               ORDER BY ModifiedDate DESC
+           ) AS rn
+    FROM Sales.SalesOrderHeader
+)
 SELECT *
-FROM Sales.SalesOrderHeader
-EXCEPT
-SELECT DISTINCT *
-FROM Sales.SalesOrderHeader;
+FROM cte
+WHERE rn > 1;
 
 ALTER TABLE sales.salesOrderHeader
 DROP COLUMN comment, rowguid;
@@ -432,11 +462,17 @@ SELECT
 FROM Sales.SalesTerritory;
 
 --DUPLICADOS
+WITH cte AS (
+    SELECT *,
+           ROW_NUMBER() OVER(
+               PARTITION BY TerritoryID, Name, CountryRegionCode, SalesYTD, SalesLastYear, CostYTD, CostLastYear, ModifiedDate
+               ORDER BY ModifiedDate DESC
+           ) AS rn
+    FROM Sales.SalesTerritory
+)
 SELECT *
-FROM Sales.SalesTerritory
-EXCEPT
-SELECT DISTINCT *
-FROM Sales.SalesTerritory;
+FROM cte
+WHERE rn > 1;
 
 --info de la tabla
 SELECT
@@ -475,11 +511,17 @@ SET SalesQuota = 250000
 WHERE SalesQuota IS NULL;
 
 --DUPLICADOS
+WITH cte AS (
+    SELECT *,
+           ROW_NUMBER() OVER(
+               PARTITION BY BusinessEntityID, TerritoryID, SalesQuota, Bonus, CommissionPct, SalesYTD, SalesLastYear,  ModifiedDate
+               ORDER BY ModifiedDate DESC
+           ) AS rn
+    FROM Sales.SalesPerson
+)
 SELECT *
-FROM Sales.SalesPerson
-EXCEPT
-SELECT DISTINCT *
-FROM Sales.SalesPerson;
+FROM cte
+WHERE rn > 1;
 
 SELECT
     c.name AS ColumnName,
@@ -512,11 +554,17 @@ FROM Production.ProductListPriceHistory;
 --duplicados
 
 --DUPLICADOS
+WITH cte AS (
+    SELECT *,
+           ROW_NUMBER() OVER(
+               PARTITION BY ProductID, StartDate, EndDate, ListPrice, ModifiedDate
+               ORDER BY ModifiedDate DESC
+           ) AS rn
+    FROM Production.ProductListPriceHistory
+)
 SELECT *
-FROM Production.ProductListPriceHistory
-EXCEPT
-SELECT DISTINCT *
-FROM Production.ProductListPriceHistory;
+FROM cte
+WHERE rn > 1;
 
 --tipos de datos
 SELECT
